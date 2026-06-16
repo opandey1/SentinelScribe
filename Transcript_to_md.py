@@ -6,15 +6,15 @@ from openai import OpenAI
 # ─────────────────────────────────────────────
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
-    api_key="xxxxx"  # Replace with your actual NVIDIA API key
+    api_key="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"  # Replace with your actual NVIDIA API key
 )
 
 # ─────────────────────────────────────────────
 # 2. Configuration
 # ─────────────────────────────────────────────
-INPUT_DIR  = "path/to/your/transcript/folder"   # Folder containing .txt transcript files
-OUTPUT_DIR = "path/to/your/output/folder"       # Where .md files will be saved
-MODEL      = "meta/llama-3.3-70b-instruct"      # NVIDIA NIM model (can be swapped)
+INPUT_DIR  = "C:\\Users\\ojasp\\Desktop\\TCM Security\\SOC 101\\Input"
+OUTPUT_DIR = "C:\\Users\\ojasp\\Desktop\\TCM Security\\SOC 101\\Output"
+MODEL      = "meta/llama-3.3-70b-instruct"
 
 # ─────────────────────────────────────────────
 # 3. Prompts
@@ -66,7 +66,25 @@ SYSTEM_PROMPT = (
     "analogies the instructor uses (e.g., 'like a phone bill') and attribute them to this "
     "lesson only if stated here. Capture all alternative protocols mentioned.\n\n"
 
-    "### 2. Ports, Protocols & Key Values\n"
+    "### 2. Technical Deep Dives & Key Processes\n"
+    "Capture every technical concept, protocol mechanism, or multi-step process the "
+    "instructor explains in depth — the kind of material an analyst is expected to be able "
+    "to articulate in a technical interview (e.g., the TCP three-way handshake, how DNS "
+    "resolution works, Windows core processes and their parent/child relationships, the "
+    "Windows network analysis workflow, email anatomy [header, body/content, attachments], "
+    "PDF analysis, and maldoc analysis). For each concept, explain the mechanism in clear, "
+    "accurate technical prose. CRITICAL: If the instructor describes a concept as an ordered "
+    "sequence of steps (e.g., SYN -> SYN-ACK -> ACK), you MUST render it as a numbered list "
+    "that preserves the exact order AND every specific detail the instructor cites for each "
+    "step (e.g., which flags are set, that the acknowledgement number is the sequence number "
+    "incremented by one, which header fields matter). Do NOT oversimplify or compress the "
+    "chain of cause and effect — capture it exactly as taught. SCOPE BOUNDARIES: this "
+    "section is for how things WORK conceptually. Investigative or IR procedures belong in "
+    "the Analyst Tips & IR Methodology section; exact command/tool syntax belongs in the "
+    "Command-line Syntax section; do not duplicate content across them. If this lesson "
+    "contains no in-depth conceptual explanation, write 'None mentioned.'\n\n"
+
+    "### 3. Ports, Protocols & Key Values\n"
     "If the transcript enumerates ports, protocols, flags, or any reference list, render "
     "them as a Markdown table. Do NOT summarise into prose. Use this format:\n"
     "| Port | Protocol | Notes |\n"
@@ -76,18 +94,18 @@ SYSTEM_PROMPT = (
     "vulnerability, security implication, and Windows/Linux context mentioned by the "
     "instructor for each port. If nothing was mentioned, write 'None mentioned.'\n\n"
 
-    "### 3. Command-line Syntax\n"
+    "### 4. Command-line Syntax\n"
     "Extract every CLI command or script mentioned. Document the exact syntax in fenced "
     "code blocks. If only the command name is mentioned without full syntax, document the "
     "name and its stated purpose.\n\n"
 
-    "### 4. Tools & Infrastructure\n"
+    "### 5. Tools & Infrastructure\n"
     "Document every tool, appliance, or data collection method mentioned "
     "(e.g., Wireshark, network taps, SPAN ports, NetFlow collectors). Include the purpose "
     "of each as described by the instructor. Do not include flags here — those go in "
-    "Section 5.\n\n"
+    "Section 6.\n\n"
 
-    "### 5. Flags, Settings & Configurations\n"
+    "### 6. Flags, Settings & Configurations\n"
     "ONLY include flags explicitly stated as flags (i.e., they begin with - or --). "
     "Network interface names are NEVER flags. If a lesson covers multiple tools, create "
     "a separate labelled sub-table per tool. Use this format:\n"
@@ -95,13 +113,13 @@ SYSTEM_PROMPT = (
     "|------|--------|\n"
     "| -n   | Suppress DNS resolution |\n\n"
 
-    "### 6. Analyst Tips & IR Methodology\n"
+    "### 7. Analyst Tips & IR Methodology\n"
     "Document all pro-tips, best practices, and warnings stated by the instructor. "
     "CRITICAL: If the instructor describes a step-by-step investigation or IR methodology, "
     "you MUST format it as a numbered list (1, 2, 3...) that preserves the exact sequence "
     "of steps as stated.\n\n"
 
-    "### 7. IOCs & Forensic Artifacts\n"
+    "### 8. IOCs & Forensic Artifacts\n"
     "Capture all IP addresses, domains, URLs, file names, string signatures "
     "(e.g., 'This program cannot be run in DOS mode'), user agents, and malware family "
     "names. Present as a table with no duplicate rows. Use this format:\n"
@@ -118,7 +136,8 @@ VALIDATION_PROMPT = (
     "it. Your ONLY job is to identify what is MISSING or INCORRECT in the notes compared "
     "to the transcript. Be specific and exhaustive.\n\n"
     "First, silently extract a list of all technical tools, commands, flags, analogies, "
-    "ports, protocols, IOCs, forensic artifacts, and specific facts mentioned in the "
+    "ports, protocols, IOCs, forensic artifacts, multi-step processes, conceptual "
+    "explanations, and specific facts mentioned in the "
     "transcript. Then, verify if each one exists in the generated notes. Use this internal "
     "checklist to drive your gap analysis before producing your output.\n\n"
 
@@ -138,7 +157,12 @@ VALIDATION_PROMPT = (
     "but not actually used by the instructor in this transcript).\n"
     "8. An IP address, domain, or filename that was garbled in the transcript but was "
     "silently 'corrected' to a plausible value in the notes without a "
-    "[transcription unclear] note.\n\n"
+    "[transcription unclear] note.\n"
+    "9. Any in-depth technical concept or multi-step process the instructor explained "
+    "(e.g., the TCP three-way handshake, DNS resolution, Windows core processes, Windows "
+    "network analysis, email/PDF/maldoc analysis) that is either MISSING from Section 2, or "
+    "PRESENT but incomplete — i.e., missing steps, header fields, flags, or specific values "
+    "the instructor stated. Verify the exact step order is preserved for any sequence.\n\n"
 
     "OUTPUT FORMAT:\n"
     "Return ONLY a bullet-point list of specific, actionable gaps or errors found.\n"

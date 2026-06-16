@@ -5,7 +5,7 @@
 [![Python](https://img.shields.io/badge/Python-3.8%2B-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![NVIDIA NIM](https://img.shields.io/badge/NVIDIA%20NIM-Llama--3.3--70B-76B900?style=flat&logo=nvidia&logoColor=white)](https://build.nvidia.com/)
 [![Model](https://img.shields.io/badge/Model-meta%2Fllama--3.3--70b--instruct-orange?style=flat)](https://build.nvidia.com/meta/llama-3_3-70b-instruct)
-[![Architecture](https://img.shields.io/badge/Architecture-Actor--Critic%203--Pass-blueviolet?style=flat)]()
+[![Architecture](https://img.shields.io/badge/Architecture-Actor--Critic%203--Pass-blueviolet?style=flat)](https://github.com/opandey1/SentinelScribe/blob/main)
 [![Obsidian](https://img.shields.io/badge/Output-Obsidian%20Vault-7C3AED?style=flat&logo=obsidian&logoColor=white)](https://obsidian.md/)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat)](LICENSE)
 
@@ -39,7 +39,7 @@ The solution is a **three-pass Actor-Critic pipeline** that separates generation
 │  │              │     │              │     │                  │   │
 │  │ Converts raw │     │ CoT gap      │     │ Applies fixes;   │   │
 │  │ transcript   │     │ analysis vs. │     │ outputs FULL     │   │
-│  │ → 7-section  │     │ original     │     │ corrected doc    │   │
+│  │ → 8-section  │     │ original     │     │ corrected doc    │   │
 │  │ Markdown     │     │ transcript   │     │                  │   │
 │  └──────────────┘     └──────┬───────┘     └──────────────────┘   │
 │                              │                                      │
@@ -62,23 +62,25 @@ A single-pass LLM suffers from **attention degradation** on long transcripts —
 
 ## 📋 Output Structure
 
-Every generated study guide follows a consistent 7-section schema:
+Every generated study guide follows a consistent 8-section schema:
 
 | # | Section | Contents |
 |---|---------|----------|
 | 1 | Course Objectives & Core Concepts | Learning goals, theoretical background, teaching analogies |
-| 2 | Ports, Protocols & Key Values | Reference tables with comprehensive Notes column |
-| 3 | Command-line Syntax | Fenced code blocks for every CLI command |
-| 4 | Tools & Infrastructure | Tools, collection methods (SPAN ports, taps, NetFlow) |
-| 5 | Flags, Settings & Configurations | Per-tool flag tables (tcpdump, grep, etc. separated) |
-| 6 | Analyst Tips & IR Methodology | Numbered step-by-step IR sequences preserved in order |
-| 7 | IOCs & Forensic Artifacts | 3-column table: IOC / Artifact \| Type \| Description |
+| 2 | Technical Deep Dives & Key Processes | In-depth concept and process walkthroughs (TCP three-way handshake, DNS resolution, Windows core processes, email/PDF/maldoc analysis); ordered steps preserved for interview readiness |
+| 3 | Ports, Protocols & Key Values | Reference tables with comprehensive Notes column |
+| 4 | Command-line Syntax | Fenced code blocks for every CLI command |
+| 5 | Tools & Infrastructure | Tools, collection methods (SPAN ports, taps, NetFlow) |
+| 6 | Flags, Settings & Configurations | Per-tool flag tables (tcpdump, grep, etc. separated) |
+| 7 | Analyst Tips & IR Methodology | Numbered step-by-step IR sequences preserved in order |
+| 8 | IOCs & Forensic Artifacts | 3-column table: IOC / Artifact \| Type \| Description |
 
 ---
 
 ## ✨ Key Features
 
 - **Zero hallucination mode** — `temperature=0.0` + `top_p=0.1` forces the model to act as a strict transcription extractor, not a knowledge generator
+- **Interview-ready concept capture** — A dedicated section preserves the instructor's in-depth technical walkthroughs (e.g., the TCP three-way handshake) as ordered, detail-complete steps, enforced by a matching Critic check so they're never silently dropped
 - **Forensic integrity** — Garbled or unverifiable values (IPs, filenames) are tagged `[transcription unclear]` rather than silently "corrected"
 - **Phonetic correction map** — Mandatory speech-to-text error fixes for known Otter.ai failures (e.g., `'cobalt stripe'` → Cobalt Strike, `'Sierra cotta'` → Suricata)
 - **Chain-of-Thought validation** — The Critic pass builds an internal checklist of every technical item in the transcript before checking the notes — the only reliable way to catch missing content
@@ -152,8 +154,8 @@ Processing: 6_tcpdump_Analyzing_Network_Traffic_transcript.txt
   Pass 2 — Validating notes:   [Done]
 
   ── Validation Report ──
-  • Section 5: grep flags (-E, -i, -v) placed in tcpdump flag table
-  • Section 7: IP 85.239.53.219 appears twice in IOC table
+  • Section 6: grep flags (-E, -i, -v) placed in tcpdump flag table
+  • Section 8: IP 85.239.53.219 appears twice in IOC table
   ────────────────────────────────────────────────
   Pass 3 — Fixing notes:       [Done]
   Saved: path/to/output/6_tcpdump_Analyzing_Network_Traffic_transcript.md
@@ -184,13 +186,14 @@ sentinelscribe/
 
 ## 🔬 Engineering Journey
 
-This project evolved through three distinct phases, each driven by specific failure modes discovered during QA:
+This project evolved through four distinct phases, each driven by specific failure modes discovered during QA:
 
 | Phase | Focus | Key Problem Solved |
 |-------|-------|--------------------|
 | **V1** | Infrastructure | OpenAI quota limits; streaming aggregation; token limits |
 | **V2** | Prompt Guardrails | Hallucinations; semantic bleed; 4→7 section schema; forensic integrity |
 | **V3** | Actor-Critic Architecture | Attention degradation; missing content detection via CoT validation |
+| **V4** | Conceptual Depth | Interview-ready technical deep-dives; 7→8 section schema; 9-point Critic checklist |
 
 For the full technical detail of every change, see [`docs/SentinelScribe_Pipeline_Changelog.pdf`](docs/SentinelScribe_Pipeline_Changelog.pdf).
 
@@ -201,7 +204,7 @@ For the full technical detail of every change, see [`docs/SentinelScribe_Pipelin
 SentinelScribe is designed to be modular. Some straightforward extensions:
 
 - **Swap the model** — Change the `MODEL` constant to use any OpenAI-compatible endpoint (GPT-4o, Claude via API, Gemini, etc.)
-- **Add a new course** — The 7-section schema and guardrails are course-agnostic; works with any technical cybersecurity lecture
+- **Add a new course** — The 8-section schema and guardrails are course-agnostic; works with any technical cybersecurity lecture
 - **Custom correction map** — Add domain-specific phonetic errors to Rule 3 in `SYSTEM_PROMPT` for your speech-to-text tool
 - **Automated Obsidian import** — Pipe `OUTPUT_DIR` directly to your Obsidian vault folder
 
