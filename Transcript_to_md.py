@@ -6,14 +6,14 @@ from openai import OpenAI
 # ─────────────────────────────────────────────
 client = OpenAI(
     base_url="https://integrate.api.nvidia.com/v1",
-    api_key="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"  # Replace with your actual NVIDIA API key
+    api_key="xxxxxxxx"  # Replace with your actual NVIDIA API key
 )
 
 # ─────────────────────────────────────────────
 # 2. Configuration
 # ─────────────────────────────────────────────
-INPUT_DIR  = "C:\\Users\\ojasp\\Desktop\\TCM Security\\SOC 101\\Input"
-OUTPUT_DIR = "C:\\Users\\ojasp\\Desktop\\TCM Security\\SOC 101\\Output"
+INPUT_DIR  = "path/to/your/transcript/folder"
+OUTPUT_DIR = "path/to/your/output/folder"
 MODEL      = "meta/llama-3.3-70b-instruct"
 
 # ─────────────────────────────────────────────
